@@ -1,10 +1,12 @@
 const express = require('express');
 const wa = require('@open-wa/wa-automate');
-require('dotenv').config()
+const qrcode = require('qrcode'); 
+require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+app.use(express.static('public'));
 app.listen(PORT, async () => {
     console.log('Servidor rodando na porta', PORT);
 
@@ -51,6 +53,29 @@ app.listen(PORT, async () => {
         const client = await wa.create();
         console.log('Cliente conectado com sucesso');
         start(client);
+
+        
+        app.get('/qrcode', async (req, res) => {
+            try {
+                const qrDataUrl = await generateQRCode(); 
+                res.send(`<img src="${qrDataUrl}" alt="QR Code" />`);
+            } catch (error) {
+                console.error('Erro ao gerar QR code:', error);
+                res.status(500).send('Erro ao gerar QR code');
+            }
+        });
+
+        
+        async function generateQRCode() {
+            try {
+                const qrData = await wa.getQR(client); 
+                const qrDataUrl = await qrcode.toDataURL(qrData);
+                return qrDataUrl;
+            } catch (error) {
+                console.error('Erro ao gerar QR code:', error);
+                throw error;
+            }
+        }
 
     } catch (error) {
         console.error('Ocorreu um erro ao conectar cliente', error);
