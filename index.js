@@ -1,6 +1,6 @@
 const express = require('express');
 const wa = require('@open-wa/wa-automate');
-const qrcode = require('qrcode'); 
+const qrcode = require('qrcode');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
@@ -19,7 +19,7 @@ app.listen(PORT, async () => {
                 const response = message.body.toLowerCase();
 
                 if (blockedNumber.has(message.from)) {
-                    return; 
+                    return;
                 }
 
                 if (first === true) {
@@ -38,13 +38,13 @@ app.listen(PORT, async () => {
                             break;
                         default:
                             await client.sendText(message.from, 'Não entendi, por favor, selecione uma das opções');
-                            return; 
+                            return;
                     }
 
                     blockedNumber.add(message.from);
                     setTimeout(() => {
                         blockedNumber.delete(message.from);
-                        first = true; 
+                        first = true;
                     }, 2 * 60 * 60 * 1000);
                 }
             });
@@ -54,21 +54,20 @@ app.listen(PORT, async () => {
         console.log('Cliente conectado com sucesso');
         start(client);
 
-        
         app.get('/qrcode', async (req, res) => {
             try {
-                const qrDataUrl = await generateQRCode(); 
+                const qrDataUrl = await generateQRCode();
                 res.send(`<img src="${qrDataUrl}" alt="QR Code" />`);
+                console.log('QR Code Data URL:', qrDataUrl); 
             } catch (error) {
                 console.error('Erro ao gerar QR code:', error);
                 res.status(500).send('Erro ao gerar QR code');
             }
         });
 
-        
         async function generateQRCode() {
             try {
-                const qrData = await wa.getQR(client); 
+                const qrData = await wa.getQR(client);
                 const qrDataUrl = await qrcode.toDataURL(qrData);
                 return qrDataUrl;
             } catch (error) {
